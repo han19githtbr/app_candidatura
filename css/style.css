@@ -440,13 +440,24 @@ svg {
   font-weight: 700;
 }
 
-.job-description {
+.job-description,
+.job-pitch {
   display: -webkit-box;
   margin-top: 10px;
   overflow: hidden;
   color: #3a4656;
   -webkit-box-orient: vertical;
+}
+
+.job-description {
   -webkit-line-clamp: 3;
+}
+
+.job-pitch {
+  -webkit-line-clamp: 4;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #3b3c44;
 }
 
 .tag-row {

@@ -148,8 +148,26 @@ function syncFiltersFromForm() {
   state.filters.lowCompetitionOnly = els.lowCompetitionOnly.checked;
 }
 
+function buildSearchQuery() {
+  const explicitSearch = state.filters.search.trim();
+  if (explicitSearch) {
+    return explicitSearch;
+  }
+
+  const terms = [
+    ...state.data.profile.preferredTerms,
+    ...(state.data.profile.keywords || [])
+  ]
+    .filter(Boolean)
+    .filter((value, index, array) => array.indexOf(value) === index)
+    .filter((value) => !/remote|remoto|pj|freelance|clt|full-time|contract|internship|estagio/i.test(value))
+    .slice(0, 10);
+
+  return terms.join(" ");
+}
+
 async function refreshJobs() {
-  const query = state.filters.search || state.data.profile.preferredTerms.slice(0, 4).join(" ");
+  const query = buildSearchQuery();
   setStatus("Buscando vagas...");
   els.refreshButton.disabled = true;
 
@@ -174,8 +192,43 @@ async function refreshJobs() {
 function rankJobs(jobs) {
   const keywords = state.data.profile.keywords.map(normalizeText);
   const preferred = state.data.profile.preferredTerms.map(normalizeText);
-  const coreFrontend = ["front-end", "frontend", "react", "react.js", "next.js", "angular", "javascript", "html", "css", "ui", "web"];
-  const adjacent = ["node.js", "firebase", "wordpress", "api", "rest", "figma", "mongodb", "postgresql"];
+  const coreFrontend = [
+    "front-end",
+    "frontend",
+    "react",
+    "reactjs",
+    "react.js",
+    "next.js",
+    "nextjs",
+    "angular",
+    "javascript",
+    "html",
+    "css",
+    "ui",
+    "web",
+    "typescript",
+    "node",
+    "node.js",
+    "nodejs"
+  ];
+  const adjacent = [
+    "firebase",
+    "firestore",
+    "mongodb",
+    "postgresql",
+    "wordpress",
+    "elementor",
+    "api",
+    "rest",
+    "web sockets",
+    "websockets",
+    "git",
+    "gitlab",
+    "figma",
+    "java",
+    "spring boot",
+    "springboot"
+  ];
   const distantRoles = ["devops", "android", "ios", "mobile", "aws", "azure", ".net", "c#", "c++", "golang", "python", "data engineer", "qa automation", "salesforce"];
 
   return jobs.map((job) => {
@@ -187,19 +240,36 @@ function rankJobs(jobs) {
     const titleCoreHits = coreFrontend.filter((word) => titleText.includes(word)).length;
     const adjacentHits = adjacent.filter((word) => haystack.includes(word)).length;
     const distantHits = distantRoles.filter((word) => haystack.includes(word)).length;
-    const remoteBonus = /remoto|remote|worldwide|anywhere|brasil/i.test(`${job.location} ${job.description}`) ? 12 : 0;
-    const freelanceBonus = /freelance|contract|pj|contrato/i.test(`${job.type} ${job.title} ${job.description}`) ? 8 : 0;
+    const remoteBonus = /remoto|remote|worldwide|anywhere|brasil/.test(`${job.location} ${job.description}`) ? 12 : 0;
+    const freelanceBonus = /freelance|contract|pj|contrato|part-time/.test(`${job.type} ${job.title} ${job.description}`) ? 8 : 0;
     const rolePenalty = titleCoreHits === 0 && distantHits > 0 ? distantHits * 14 : distantHits * 6;
     const noFrontendPenalty = coreHits === 0 ? 28 : 0;
-    const score = clamp(Math.round(28 + keywordHits * 2 + preferredHits * 7 + coreHits * 7 + titleCoreHits * 12 + adjacentHits * 3 + remoteBonus + freelanceBonus - rolePenalty - noFrontendPenalty), 12, 98);
+    const score = clamp(
+      Math.round(
+        28 +
+          keywordHits * 2 +
+          preferredHits * 7 +
+          coreHits * 7 +
+          titleCoreHits * 12 +
+          adjacentHits * 3 +
+          remoteBonus +
+          freelanceBonus -
+          rolePenalty -
+          noFrontendPenalty
+      ),
+      12,
+      98
+    );
     const competitionScore = calculateCompetitionScore(job, haystack);
     const opportunityScore = Math.round(score * 0.7 + competitionScore * 0.3);
+    const pitch = buildCandidatePitch(job, haystack);
 
     return {
       ...job,
       score,
       competitionScore,
       opportunityScore,
+      pitch,
       tags: Array.from(new Set((job.tags || []).filter(Boolean))).slice(0, 6)
     };
   });
@@ -226,6 +296,13 @@ function renderJobs() {
     card.querySelector(".job-description").textContent = job.description || "Abra a vaga para conferir os detalhes completos.";
     card.querySelector(".match-value").textContent = `${job.score}%`;
     card.querySelector(".competition-value").textContent = getCompetitionLabel(job.competitionScore);
+
+    if (job.pitch) {
+      const pitch = document.createElement("p");
+      pitch.className = "job-pitch";
+      pitch.textContent = job.pitch;
+      card.querySelector(".job-description").insertAdjacentElement("afterend", pitch);
+    }
 
     const tagRow = card.querySelector(".tag-row");
     job.tags.forEach((tag) => {
@@ -294,7 +371,7 @@ function clamp(value, min, max) {
 }
 
 function renderPlatformLinks() {
-  const query = state.filters.search || state.data.profile.preferredTerms.slice(0, 3).join(" ");
+  const query = buildSearchQuery();
   const location = state.filters.location === "remote" ? "Brasil remoto" : state.filters.location;
   els.platformLinks.innerHTML = "";
   els.sourceCount.textContent = state.data.platforms.length + API_SOURCES.length;
@@ -329,8 +406,9 @@ function hydrateProfile() {
     els.cvButton.style.display = "none";
   }
 
-  els.searchInput.value = profile.preferredTerms.slice(0, 3).join(" ");
-  state.filters.search = els.searchInput.value;
+  els.searchInput.value = "";
+  els.searchInput.placeholder = profile.preferredTerms.slice(0, 3).join(" ");
+  state.filters.search = "";
 }
 
 async function enableNotifications() {
@@ -396,9 +474,57 @@ function stripHtml(value = "") {
 
 function normalizeText(value = "") {
   return String(value)
+    .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function buildCandidatePitch(job, haystack) {
+  const profile = state.data.profile;
+  const skillCandidates = (profile.skills || profile.keywords || [])
+    .filter((skill) => !/remote|remoto|pj|freelance|clt|full-time|contract|internship|estagio/i.test(skill))
+    .map((skill) => ({ label: skill, token: normalizeText(skill) }));
+
+  const matchedSkills = skillCandidates
+    .filter((skill) => skill.token && haystack.includes(skill.token))
+    .map((skill) => skill.label);
+
+  const skills = Array.from(new Set(matchedSkills)).slice(0, 6);
+  const featureSkills = skills.length ? skills : (profile.preferredTerms || []).slice(0, 4);
+  const skillText = featureSkills.join(", ").replace(/, ([^,]*)$/, " e $1");
+
+  const isReact = /react|reactjs/.test(haystack);
+  const isAngular = /angular/.test(haystack);
+  const isNext = /next|nextjs/.test(haystack);
+  const isFrontend = /frontend|ui|interface|web/.test(haystack);
+  const isRemote = /remote|remoto|worldwide|anywhere/.test(`${job.location} ${job.description}`);
+  const isPJ = /pj|contract|freelance|autonomo|autônomo/.test(`${job.type} ${job.title} ${job.description}`);
+
+  let roleFocus = "soluções web sólidas com integrações de API e experiência de usuário";
+  if (isReact) {
+    roleFocus = "projetos React escaláveis com foco em componentes reutilizáveis e desempenho";
+  } else if (isNext) {
+    roleFocus = "aplicações Next.js com entrega rápida, SEO otimizado e experiência de usuário moderna";
+  } else if (isAngular) {
+    roleFocus = "aplicações Angular robustas com arquitetura modular e continuidade de produto";
+  } else if (isFrontend) {
+    roleFocus = "interfaces web modernas e experiências responsivas";
+  }
+
+  const extraNote = [];
+  if (isRemote) {
+    extraNote.push("trabalho remoto com disciplina, comunicação proativa e foco em entregas" );
+  }
+  if (isPJ) {
+    extraNote.push("experiência em projetos PJ/freelance com autonomia e entrega dentro do prazo");
+  }
+
+  const extraText = extraNote.length ? ` ${extraNote.join(" e ")}.` : "";
+
+  return `Como candidato para esta vaga, posso contribuir com minha experiência em ${skillText}, entregando ${roleFocus} e mantendo foco em qualidade, produtividade e comunicação clara com o time.${extraText}`;
 }
 
 function formatDate(value) {
