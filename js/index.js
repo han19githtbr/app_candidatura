@@ -30,6 +30,7 @@ const els = {
   typeSelect: document.querySelector("#type-select"),
   strongOnly: document.querySelector("#strong-only"),
   lowCompetitionOnly: document.querySelector("#low-competition-only"),
+  startImmediateOnly: document.querySelector("#start-immediate-only"),
   sortSelect: document.querySelector("#sort-select"),
   refreshButton: document.querySelector("#refresh-button"),
   notifyButton: document.querySelector("#notify-button"),
@@ -114,7 +115,7 @@ function bindEvents() {
     document.body.classList.remove("filters-open");
   });
 
-  [els.locationSelect, els.typeSelect, els.strongOnly, els.lowCompetitionOnly].forEach((input) => {
+  [els.locationSelect, els.typeSelect, els.strongOnly, els.lowCompetitionOnly, els.startImmediateOnly].forEach((input) => {
     input.addEventListener("change", () => {
       syncFiltersFromForm();
       renderPlatformLinks();
@@ -146,22 +147,26 @@ function syncFiltersFromForm() {
   state.filters.type = els.typeSelect.value;
   state.filters.strongOnly = els.strongOnly.checked;
   state.filters.lowCompetitionOnly = els.lowCompetitionOnly.checked;
+  state.filters.startImmediateOnly = els.startImmediateOnly.checked;
 }
 
 function buildSearchQuery() {
   const explicitSearch = state.filters.search.trim();
+  const immediateTerms = state.filters.startImmediateOnly ? ["inicio imediato", "início imediato", "start immediately", "immediate start"] : [];
+
   if (explicitSearch) {
-    return explicitSearch;
+    return `${explicitSearch} ${immediateTerms.join(" ")}`.trim();
   }
 
   const terms = [
     ...state.data.profile.preferredTerms,
-    ...(state.data.profile.keywords || [])
+    ...(state.data.profile.keywords || []),
+    ...immediateTerms
   ]
     .filter(Boolean)
     .filter((value, index, array) => array.indexOf(value) === index)
-    .filter((value) => !/remote|remoto|pj|freelance|clt|full-time|contract|internship|estagio/i.test(value))
-    .slice(0, 10);
+    .filter((value) => !/remote|remoto|pj|freelance|clt|full-time|contract|internship|estagio/i.test(value) || /inicio imediato|start immediately|immediate start/i.test(value))
+    .slice(0, 12);
 
   return terms.join(" ");
 }
@@ -242,6 +247,7 @@ function rankJobs(jobs) {
     const distantHits = distantRoles.filter((word) => haystack.includes(word)).length;
     const remoteBonus = /remoto|remote|worldwide|anywhere|brasil/.test(`${job.location} ${job.description}`) ? 12 : 0;
     const freelanceBonus = /freelance|contract|pj|contrato|part-time/.test(`${job.type} ${job.title} ${job.description}`) ? 8 : 0;
+    const startImmediateBonus = /inicio imediato|inicio imediato|início imediato|start immediately|immediate start|imediato/.test(haystack) ? 8 : 0;
     const rolePenalty = titleCoreHits === 0 && distantHits > 0 ? distantHits * 14 : distantHits * 6;
     const noFrontendPenalty = coreHits === 0 ? 28 : 0;
     const score = clamp(
@@ -253,7 +259,8 @@ function rankJobs(jobs) {
           titleCoreHits * 12 +
           adjacentHits * 3 +
           remoteBonus +
-          freelanceBonus -
+          freelanceBonus +
+          startImmediateBonus -
           rolePenalty -
           noFrontendPenalty
       ),
@@ -334,7 +341,8 @@ function getVisibleJobs() {
       const matchesType = state.filters.type === "all" || normalizeText(job.type).includes(state.filters.type) || haystack.includes(state.filters.type);
       const matchesStrength = !state.filters.strongOnly || job.score >= 72;
       const matchesCompetition = !state.filters.lowCompetitionOnly || (job.score >= 62 && job.competitionScore >= 58);
-      return matchesTerm && matchesLocation && matchesType && matchesStrength && matchesCompetition;
+      const matchesImmediate = !state.filters.startImmediateOnly || /inicio imediato|inicio imediato|início imediato|start immediately|immediate start|imediato/.test(haystack);
+      return matchesTerm && matchesLocation && matchesType && matchesStrength && matchesCompetition && matchesImmediate;
     })
     .sort(sortJobs);
 }
@@ -502,6 +510,7 @@ function buildCandidatePitch(job, haystack) {
   const isFrontend = /frontend|ui|interface|web/.test(haystack);
   const isRemote = /remote|remoto|worldwide|anywhere/.test(`${job.location} ${job.description}`);
   const isPJ = /pj|contract|freelance|autonomo|autônomo/.test(`${job.type} ${job.title} ${job.description}`);
+  const isImmediate = /inicio imediato|início imediato|start immediately|immediate start|inmediato|imediato/.test(haystack);
 
   let roleFocus = "soluções web sólidas com integrações de API e experiência de usuário";
   if (isReact) {
@@ -516,10 +525,13 @@ function buildCandidatePitch(job, haystack) {
 
   const extraNote = [];
   if (isRemote) {
-    extraNote.push("trabalho remoto com disciplina, comunicação proativa e foco em entregas" );
+    extraNote.push("trabalho remoto com disciplina, comunicação proativa e foco em entregas");
   }
   if (isPJ) {
     extraNote.push("experiência em projetos PJ/freelance com autonomia e entrega dentro do prazo");
+  }
+  if (isImmediate) {
+    extraNote.push("estou disponível para início imediato e pronto para começar assim que precisar");
   }
 
   const extraText = extraNote.length ? ` ${extraNote.join(" e ")}.` : "";
