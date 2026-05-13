@@ -536,7 +536,7 @@ function buildCandidatePitch(job, haystack) {
 
   const extraText = extraNote.length ? ` ${extraNote.join(" e ")}.` : "";
 
-  return `Como candidato para esta vaga, posso contribuir com minha experiência em ${skillText}, entregando ${roleFocus} e mantendo foco em qualidade, produtividade e comunicação clara com o time.${extraText}`;
+  return `Como candidato para esta vaga, com 2-3 anos de experiência no mercado, posso contribuir com minha experiência em ${skillText}, entregando ${roleFocus} e mantendo foco em qualidade, produtividade e comunicação clara com o time.${extraText}`;
 }
 
 function formatDate(value) {
