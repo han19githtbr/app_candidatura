@@ -1,0 +1,142 @@
+{
+  "profile": {
+    "name": "Handy Claude Marie Milliance",
+    "title": "Desenvolvedor Front-end",
+    "location": "Niteroi, RJ",
+    "summary": "Desenvolvedor Front-end com experiencia em Angular, React, Next.js, Node.js, Firebase, integracoes de API, WordPress e projetos web responsivos. Busca vagas remotas, PJ, CLT e freelance.",
+    "cvUrl": "assets/CV_Handy_Atualizado.pdf",
+    "languages": ["Portugues", "Frances", "Crioulo", "Ingles"],
+    "keywords": [
+      "front-end",
+      "frontend",
+      "react",
+      "react.js",
+      "next.js",
+      "angular",
+      "javascript",
+      "html",
+      "css",
+      "node.js",
+      "firebase",
+      "firestore",
+      "mongodb",
+      "postgresql",
+      "wordpress",
+      "elementor",
+      "git",
+      "gitlab",
+      "api",
+      "rest",
+      "web sockets",
+      "spring boot",
+      "java",
+      "figma",
+      "remote",
+      "remoto",
+      "pj",
+      "freelance"
+    ],
+    "preferredTerms": ["React", "Angular", "Next.js", "JavaScript", "Front-end", "Node.js", "Firebase"],
+    "languages": ["Portugues", "Frances", "Crioulo", "Ingles"]
+  },
+  "platforms": [
+    {
+      "name": "Indeed",
+      "type": "Portal",
+      "urlTemplate": "https://br.indeed.com/jobs?q={query}&l={location}"
+    },
+    {
+      "name": "Glassdoor",
+      "type": "Portal",
+      "urlTemplate": "https://www.glassdoor.com.br/Vaga/{query}-vagas-SRCH_KO0,20.htm"
+    },
+    {
+      "name": "Infojobs",
+      "type": "Portal",
+      "urlTemplate": "https://www.infojobs.com.br/empregos.aspx?palabra={query}"
+    },
+    {
+      "name": "Vagas.com",
+      "type": "Portal",
+      "urlTemplate": "https://www.vagas.com.br/vagas-de-{query}"
+    },
+    {
+      "name": "Catho",
+      "type": "Portal",
+      "urlTemplate": "https://www.catho.com.br/vagas/{query}/"
+    },
+    {
+      "name": "LinkedIn",
+      "type": "Portal",
+      "urlTemplate": "https://www.linkedin.com/jobs/search/?keywords={query}&location={location}"
+    },
+    {
+      "name": "Programathor",
+      "type": "Tech",
+      "urlTemplate": "https://programathor.com.br/jobs?search={query}"
+    },
+    {
+      "name": "Trampos",
+      "type": "Tech",
+      "urlTemplate": "https://trampos.co/oportunidades?lc=br&q={query}"
+    },
+    {
+      "name": "Revelo",
+      "type": "Tech",
+      "urlTemplate": "https://www.revelo.com.br/vagas"
+    },
+    {
+      "name": "Workana",
+      "type": "Freelance",
+      "urlTemplate": "https://www.workana.com/jobs?query={query}"
+    },
+    {
+      "name": "99Freelas",
+      "type": "Freelance",
+      "urlTemplate": "https://www.99freelas.com.br/projects?q={query}"
+    },
+    {
+      "name": "Upwork",
+      "type": "Freelance",
+      "urlTemplate": "https://www.upwork.com/nx/search/jobs/?q={query}"
+    }
+  ],
+  "seedJobs": [
+    {
+      "id": "seed-frontend-react",
+      "title": "Desenvolvedor Front-end React",
+      "company": "Busca sugerida",
+      "location": "Remoto",
+      "type": "contract",
+      "source": "Modelo local",
+      "url": "https://www.linkedin.com/jobs/search/?keywords=React%20Front-end&location=Brasil",
+      "createdAt": "2026-05-13",
+      "description": "Use este card como ponto de partida para procurar vagas React, Next.js, JavaScript, HTML, CSS e integracoes de API.",
+      "tags": ["React", "Next.js", "JavaScript", "API", "Remoto"]
+    },
+    {
+      "id": "seed-angular",
+      "title": "Desenvolvedor Angular Pleno",
+      "company": "Busca sugerida",
+      "location": "Brasil",
+      "type": "full-time",
+      "source": "Modelo local",
+      "url": "https://br.indeed.com/jobs?q=Angular%20Front-end&l=Brasil",
+      "createdAt": "2026-05-13",
+      "description": "Procure oportunidades com Angular, Node.js, sprint, correcao de bugs e integracao de aplicacoes web.",
+      "tags": ["Angular", "Node.js", "Front-end", "Brasil"]
+    },
+    {
+      "id": "seed-freela",
+      "title": "Freelancer Web React / WordPress",
+      "company": "Busca sugerida",
+      "location": "Remoto",
+      "type": "freelance",
+      "source": "Modelo local",
+      "url": "https://www.workana.com/jobs?query=React%20WordPress%20JavaScript",
+      "createdAt": "2026-05-13",
+      "description": "Boa trilha para projetos curtos usando React, WordPress, Elementor, Firebase e manutencao de paginas responsivas.",
+      "tags": ["Freelance", "React", "WordPress", "Firebase"]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Radar de Vagas Handy",
+  "short_name": "Vagas Handy",
+  "description": "PWA para encontrar vagas compativeis com o curriculo de Handy Claude.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#14213d",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#14213d" />
+    <title>Radar de Vagas | Handy</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Perfil e filtros">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">H</span>
+          <div>
+            <h1>Radar de Vagas</h1>
+            <p>Handy Claude</p>
+          </div>
+        </div>
+
+        <section class="profile-panel" aria-labelledby="profile-title">
+          <h2 id="profile-title">Seu alvo</h2>
+          <p class="profile-role" id="profile-role">Desenvolvedor Front-end</p>
+          <p id="profile-summary">Carregando perfil...</p>
+          <div class="profile-chips" id="profile-tags"></div>
+          <div class="profile-metadata">
+            <div>
+              <strong>Idiomas</strong>
+              <p id="profile-languages">Carregando...</p>
+            </div>
+          </div>
+          <div class="score-strip">
+            <span><strong id="match-count">0</strong> vagas fortes</span>
+            <span><strong id="source-count">0</strong> fontes</span>
+          </div>
+          <div class="profile-actions">
+            <a id="cv-button" class="secondary-button" href="#" target="_blank" rel="noreferrer">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17v-8M8 13l4 4 4-4M5 19h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2Z"/></svg>
+              Ver currículo
+            </a>
+          </div>
+        </section>
+
+        <form class="filters" id="filters">
+          <label for="search-input">Buscar por termo</label>
+          <div class="input-row">
+            <input id="search-input" name="search" type="search" placeholder="React, Angular, remoto..." autocomplete="off" />
+            <button class="icon-button" type="submit" title="Buscar vagas" aria-label="Buscar vagas">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"/></svg>
+            </button>
+          </div>
+
+          <label for="location-select">Local</label>
+          <select id="location-select" name="location">
+            <option value="remote">Remoto</option>
+            <option value="rio de janeiro">Rio de Janeiro</option>
+            <option value="sao paulo">São Paulo</option>
+            <option value="brazil">Brasil</option>
+            <option value="worldwide">Internacional</option>
+          </select>
+
+          <label for="type-select">Tipo</label>
+          <select id="type-select" name="type">
+            <option value="all">Todos</option>
+            <option value="full-time">CLT / tempo integral</option>
+            <option value="contract">PJ / contrato</option>
+            <option value="freelance">Freelance</option>
+            <option value="internship">Estágio</option>
+          </select>
+
+          <label class="toggle">
+            <input id="strong-only" type="checkbox" />
+            <span>Mostrar só alta compatibilidade</span>
+          </label>
+
+          <label class="toggle">
+            <input id="low-competition-only" type="checkbox" checked />
+            <span>Priorizar menor concorrência</span>
+          </label>
+        </form>
+
+        <div class="action-stack">
+          <button id="refresh-button" class="primary-button" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"/></svg>
+            Atualizar vagas
+          </button>
+          <button id="notify-button" class="secondary-button" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 7h18s-3 0-3-7M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            Ativar notificações
+          </button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Busca inteligente</p>
+            <h2>Vagas alinhadas ao seu currículo</h2>
+          </div>
+          <div class="topbar-actions">
+            <button id="toggle-filters" class="secondary-button mobile-only" type="button">Filtros</button>
+            <div class="status-pill" id="sync-status">Pronto</div>
+          </div>
+        </header>
+
+        <section class="quick-links" aria-labelledby="quick-links-title">
+          <div class="section-heading">
+            <h3 id="quick-links-title">Abrir buscas nos portais</h3>
+            <p>Links montados com seus filtros atuais para plataformas que não liberam API pública no navegador.</p>
+          </div>
+          <div class="platform-grid" id="platform-links"></div>
+        </section>
+
+        <section class="results-section" aria-labelledby="results-title">
+          <div class="section-heading results-heading">
+            <div>
+              <h3 id="results-title">Vagas encontradas</h3>
+              <p id="results-subtitle">Atualize para buscar oportunidades remotas e sugestões locais.</p>
+            </div>
+            <select id="sort-select" aria-label="Ordenar vagas">
+              <option value="opportunity">Melhor oportunidade</option>
+              <option value="score">Melhor encaixe</option>
+              <option value="competition">Menor concorrência</option>
+              <option value="recent">Mais recentes</option>
+              <option value="company">Empresa</option>
+            </select>
+          </div>
+          <div class="job-list" id="job-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <template id="job-card-template">
+      <article class="job-card">
+        <div class="job-main">
+          <div class="job-header">
+            <span class="source-badge"></span>
+            <span class="job-date"></span>
+          </div>
+          <h4></h4>
+          <p class="company-line"></p>
+          <p class="job-description"></p>
+          <div class="tag-row"></div>
+        </div>
+        <div class="job-actions">
+          <div class="match-meter">
+            <span class="match-value"></span>
+            <span>match</span>
+          </div>
+          <div class="competition-meter">
+            <span class="competition-value"></span>
+            <span>concorrência</span>
+          </div>
+          <a class="apply-link" target="_blank" rel="noreferrer">Candidatar</a>
+        </div>
+      </article>
+    </template>
+
+    <script src="js/index.js" defer></script>
+  </body>
+</html>
